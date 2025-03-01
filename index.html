@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #036581;
+      color: white;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+    }
+    header img {
+      width: 50px;
+      height: 50px;
+    }
+    header h1 {
+      margin: 10px 0 0;
+      font-size: 24px;
+    }
+    button {
+      padding: 40px 40px;
+      font-size: 24px;
+      background-color: #f1f8ff;
+      color: black;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+    }
+    #total {
+      font-size: 20px;
+      padding: 20px;
+      margin-bottom: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <header >
+        <h1>T's Market</h1>
+    </header>
+  </div>
+  <img src="logo.png" width="80%" alt="Logo" style="margin-bottom: 100px">
+
+  <button id="scan-button">Escanear</button>
+  
+
+  <div id="total">Total: R$0.00</div>
+  <audio id="audio" src="supermarket.mp3" preload="auto"></audio>
+
+  <script>
+    let total = 0;
+    const totalElement = document.getElementById('total');
+    const scanButton = document.getElementById('scan-button');
+    var ambience = new Audio('ambience.mp3');
+    var ambiencePlaying = false;    
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let audioBuffer = null;
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = 5
+    gainNode.connect(audioContext.destination);
+
+    // Function to load and decode the MP3 file
+    function loadSound(url) {
+      fetch(url)
+        .then(response => response.arrayBuffer()) // Get the audio data as an ArrayBuffer
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer)) // Decode the audio data
+        .then(buffer => {
+          audioBuffer = buffer; // Store the decoded audio buffer
+          console.log('Audio loaded and decoded successfully.');
+        })
+        .catch(error => console.error('Error loading or decoding audio:', error));
+    }
+
+    // Function to play the sound
+    function playSound() {
+      if (!audioBuffer) {
+        console.error('Audio buffer not loaded yet.');
+        return;
+      }
+
+      // Create an AudioBufferSourceNode
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer; // Set the audio buffer
+      source.connect(gainNode); // Connect to the output (speakers)
+      source.start(0); // Play the sound immediately
+    }
+
+    // Load the sound when the page loads
+    window.addEventListener('load', () => {
+      loadSound('supermarket.mp3'); // Replace 'beep.mp3' with the path to your MP3 file
+    });
+
+    scanButton.addEventListener('click', () => {
+      const randomQuantity = (Math.random() * 10).toFixed(2);
+      total += parseFloat(randomQuantity);
+      playSound()
+
+      if (!ambiencePlaying) {
+        ambiencePlaying = true;
+        ambience.play();
+      }
+
+      // Update the total display
+      totalElement.textContent = `Total: R$${total.toFixed(2)}`;
+    });
+
+  </script>
+</body>
+</html>
